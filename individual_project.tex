@@ -20,17 +20,17 @@
 
 \maketitle
 
-In 1993, Elitzur and Vaidman put forward an interesting consequence of quantum mechanics that permits measurement of a physical system without interacting with it.
+In 1993, Elitzur and Vaidman put forward an interesting consequence of quantum mechanics that permits measurement of a physical system without interacting with it. The phenomenon can be nicely illustrated by a thought-experiment using a Mach-Zender interferometer, in which a single photon is used to detect the presence light-absorbing (or scattering) obstacle. In this report, I will explore the problem of interaction-free measurement and attempt to express it in the language of qubit operations as employed in the field of quantum computer science. In the process, I will demonstrate that this is a special case of counterfactual quantum computation, a counterintuitive phenomenon that permits ascertainment of the behavior of a quantum computer without actually running that computer.
 
-\begin{figure}
-\includegraphics[scale=0.7]{mach-zender}
+\begin{figure} \label{fig:interferometer}
+\includegraphics[scale=0.8]{mach-zender}
 \centering
 \caption{Mach-Zender interferometer, based on Elitzur and Vaidman (1993). Light enters in the rightward direction then passes through 45° beam-splitters and mirrors. An object may be positioned in the path of one beam.}
 \end{figure}
 
-[Picture of the Mach-Zender interferometer, with and without the first mirror.]
+A Mach-Zender interferometer (Fig. \ref{fig:interferometer}) is an optical device consisting of mirrors, beam splitters, and detectors, that is used to determine the relative phase difference between two paths taken by a stream of particle (generally, photons). Incoming light strikes the first beam-splitter, which partitions it into two paths; one travels upwards, the other rightwards. Both beams are reflected by mirrors, and finally incident on another beam-splitter. The intensities of the resultant two beams are measured by detectors $D0$ and $D1$. Each time the beam is reflected, it incurs a phase shift. It is possible to adjust the angles and positions of the mirrors slightly so that the path difference between the two beams is exactly one-half wavelength for the upward-traveling emitted light, resulting in destructive interference between the incoming waves, while the light exiting in the rightward direction exhibits constructive interference. This will cause an isolated interferometer to measure 100\% intensity at $D0$, and 0 intensity at $D1$.
 
-To describe this example in terms of quantum stuff, let's assign qubit states to the photon. Assuming the interferometer is working properly, the photon will always (classically) be going either up or to the right, which we can represent with a single bit. Just as a photon can be in a superposition of taking both paths through the interferometer, a single qubit can be in a superposition of two classical bit values, making it an apt choice to model this system. Let state $\ket 0$ represent a photon traveling in the rightward direction, and state $\ket 1$ represent a photon traveling upward.
+In this specific case, we imagine a Mach-Zender interferometer optimized for handling a single photon. To describe this example in terms of qubit operations, we must assign qubit states to represent the photon's trajectory. Assuming the interferometer is working properly, the photon will always (classically) be going either up or to the right, which can be represented by a single bit. In reality, however, a photon can be in a superposition of taking both paths through the interferometer. To model this, we encode its direction as a single qubit can be in a superposition of two classical bit values, making it an apt choice to model this system. Let state $\ket 0$ represent a photon traveling in the rightward direction, and state $\ket 1$ represent a photon traveling upward.
 
 The optical components present include 45° mirrors and beam-splitters, as well as a pair of photon detectors. To properly capture the system's behavior, we need to represent the effects of these devices as operations on a qubit. Simplest is the pair of fully-silvered mirrors, which converts each rightward-traveling photon to an upward-traveling one, and vice-versa. For a photon in superposition, it swaps the amplitudes of upward- and rightward-traveling components, sending $\ket 0 \to \ket 1$ and $\ket 1 \to \ket 0$, which means that the mirrors have the effect of applying the Pauli $\X$ gate to the traveling photon. As a side note, a physical consequence of the reflection of light by a mirror is that each reflected photon gains a phase of $\pi/2$. However, this global phase of $i$ is not observable, so we will ignore it.
 
@@ -58,9 +58,9 @@ We can use a second qubit to track whether or not an interaction has occurred. L
 $$U_1 = \RX\left(-\frac{\pi}{2}\right)_0 \X_0 \, \CX_{01} \, \RX\left(-\frac{\pi}{2}\right)_0$$
 Following the action of the above transformation, we will measure $q_1$ to induce a partial collapse. As above, let's examine the behavior for initial state $\ket{00}$, which represents the photon traveling right with no interaction having occurred yet.
 \begin{multline} \label{eq:seq_00}
-\ket{00} \xrightarrow{\RX\left(-\frac{\pi}{2}\right)_0} \frac{\ket{00} + i\ket{01}}{\sqrt{2}} \xrightarrow{\X_0} \frac{\ket{01} + i\ket{00}}{\sqrt{2}}\\
-\xrightarrow{\CX_{01}} \frac{\ket{11} + i\ket{00}}{\sqrt{2}} \xrightarrow{\RX\left(-\frac{\pi}{2}\right)_0} \frac{i\ket{10} + \ket{11} + i\ket{00} - \ket{01}}{2}\\
-= \frac{i}{\sqrt{2}}(\ket0 \otimes \ket{+i} + \ket1 \otimes \ket{-i})
+\ket{00} \xrightarrow{\RX\left(-\frac{\pi}{2}\right)_0} \frac{\ket{00} + i\ket{01}}{\sqrt{2}} \xrightarrow{\CX_{01}} \frac{\ket{00} + i\ket{11}}{\sqrt{2}}\\
+\xrightarrow{\X_0} \frac{\ket{01} + i\ket{10}}{\sqrt{2}} \xrightarrow{\RX\left(-\frac{\pi}{2}\right)_0} \frac{i\ket{00} + \ket{01} + i\ket{10} - \ket{11}}{2}\\
+= \frac{i}{\sqrt{2}}(\ket0 \otimes \ket{-i} + \ket1 \otimes \ket{+i})
 \end{multline}
 
 %\begin{multline*}
@@ -68,8 +68,8 @@ Following the action of the above transformation, we will measure $q_1$ to induc
 %\xrightarrow{CX_{01}} \frac{i\ket{11} + \ket{00}}{\sqrt{2}} \xrightarrow{R_X\left(-\frac{\pi}{2}\right)_0} \frac{-\ket{10} + i\ket{11} + \ket{00} + i\ket{01}}{2}\\
 %= \frac{i}{\sqrt{2}}(\ket0 \otimes \ket{+i} - \ket1 \otimes \ket{-i})
 %\end{multline*}
-By comparing this sequence to Eq. \ref{eq:seq_0}, we can see that the where we had cancellation of $\ket 1$ and $-\ket 1$, we now have the linearly independent $\ket{11}$ and $-\ket{01}$. Measurement of $q_1$ in the computational basis gives:
-$$q_1 \to 0: q_0 = \ket{+i} \qquad q_1 \to 1: q_0 = \ket{-i}$$
+By comparing this sequence to Eq. \ref{eq:seq_0}, we can see that the where we had cancellation of $\ket 1$ and $-\ket 1$, we now have the linearly independent $\ket{01}$ and $-\ket{11}$. Measurement of $q_1$ in the computational basis gives:
+$$q_1 \to 0: q_0 = \ket{-i} \qquad q_1 \to 1: q_0 = \ket{+i}$$
 Unlike the unobstructed case, in which the photon always ends up traveling in the same direction that it started in, the obstructed interferometer has a 50\% chance of changing its direction of travel. Thus, it is possible for a photon fired in the rightward direction $\ket 0$ to trigger detector $D1$ iff there is an obstruction. It is particularly interesting that this is true whether or not the interaction occurs: even if $q_1$ measures to 0, $q_0$ will remain in a superposition of $\ket 0$ and $\ket 1$.
 
 In summary, when an object is absent there is a 100\% chance that $D0$ triggers, and when an object is present, there is a 50\% chance of interaction (in which case no detector triggers), a 25\% chance that $D1$ triggers, and a 25\% chance that $D0$ triggers. In comparison, an ordinary measurement would have a 100\% chance of interaction, and a 100\% theoretical accuracy. If we do an interaction-free measurement like this, we can't be sure that we won't get a false negative result. If $D1$ triggers, or if we fire a photon and no detector triggers, then we know there is an object blocking the upward beam, but if $D0$ triggers, we cannot be sure. If the prior probability of an object being present is $p_1$, then Bayes' theorem tells us that in the event of $D0$ triggering, the probability that an object is present is:
@@ -78,9 +78,9 @@ And therefore if we want an upper bound of $1/\xi$ on the false negative rate, w
 $$n = \frac{1}{2} \log_2 \left[ (\xi - 1) \frac{p_1}{1 - p_1}\right]$$
 This means that for a given certainty threshold, our detection ``algorithm'' requires additional oracle calls proportional to the logarithm of the odds that an object is present.
 
-It is possible to modify this process such that the false negative rate is zero. By applying the unitary operation $\Hgt\Sgt$ to the final result pre-measurement, mapping:
-$$\ket 0 \to \ket + \quad \ket 1 \to i \ket - \qquad \ket{+i} \to \ket 1 \quad \ket{-i} \to \ket 0$$
-If an interaction occurs, no photon emerges from the interferometer and we know for certain that an object is present. Referring to Eq. \ref{eq:seq_00}, if no interaction occurs but an object is present, the photon will exit the interferometer in state $\ket{+i}$. Applying $\Hgt\Sgt$ transforms this to $\ket 1$, resulting in a 100\% probability that $D0$ will trigger. However, if no object is present, the photon exits in state $\ket 0$, which $\Hgt\Sgt$ transforms to $\ket +$, introducing a 50\% chance of $D1$ triggering (a false positive). This trade-off is inescapable: since $\ket 0$ and $\ket{+i}$ have a non-zero inner product, no unitary operation exists that maps them onto orthogonal states (which is required for perfectly accurate measurement).
+It is possible to modify this process such that the false negative rate is zero. By applying the unitary operation $\Hgt\Sgt^\dagger$ to the final result pre-measurement, mapping:
+$$\ket 0 \to \ket + \quad \ket 1 \to - i \ket - \qquad \ket{+i} \to \ket 0 \quad \ket{-i} \to \ket 1$$
+If an interaction occurs, no photon emerges from the interferometer and we know for certain that an object is present. Referring to Eq. \ref{eq:seq_00}, if no interaction occurs but an object is present, the photon will exit the interferometer in state $\ket{-i}$. Applying $\Hgt\Sgt^\dagger$ transforms this to $\ket 1$, resulting in a 100\% probability that $D0$ will trigger. However, if no object is present, the photon exits in state $\ket 0$, which $\Hgt\Sgt$ transforms to $\ket +$, introducing a 50\% chance of $D1$ triggering (a false positive). This trade-off is inescapable: since $\ket 0$ and $\ket{-i}$ have a non-zero inner product, no unitary operation exists that maps them onto orthogonal states (which is required for perfectly accurate measurement).
 
 \begin{figure}
 \includegraphics[scale=0.5]{circuit-render}
@@ -97,14 +97,45 @@ Where $\CCX_{021}$ is the Toffoli gate with controls on $q_0$ (photon direction)
 $$q_2 = \alpha \ket 0 + \beta \ket 1$$
 Applying Eq. \ref{eq:unitary} gives:
 \begin{equation}
-\ket{q_2 0 0} \xrightarrow{U} \alpha\ket 0 \otimes i\ket{00} + \beta \ket 1 \otimes \frac{i}{\sqrt{2}}(\ket0 \otimes \ket{+i} + \ket1 \otimes \ket{-i})
+\ket{q_2 0 0} \xrightarrow{U} \alpha\ket 0 \otimes i\ket{00} + \beta \ket 1 \otimes \frac{i}{\sqrt{2}}(\ket0 \otimes \ket{-i} + \ket1 \otimes \ket{+i})
 \end{equation}
-Since both $U_0$ and $U_1$ impart an individually unobservable global phase of $i$ , there is no phase kickback induced by the control. Overall, the measurement outcomes amount to:
-$$\begin{array}{ l l }
-P(\text{interaction}) & = \frac{\beta^2}{2} \\
-P(D0) & = 1 - \frac{3 \beta^2}{4} \\
-P(D1) & = \frac{\beta^2}{4}
+Since both $U_0$ and $U_1$ impart an individually unobservable global phase of $i$ , there is no phase kickback induced by the control. It is also worth noting that measurements of $(q_1, q_0)$ that give $(0, 1)$, $(1, 0)$ or $(1, 1)$ all correspond to eigenstates with $q_2 = \ket 1$, meaning that even in the absence of interaction, a positive measurement still induces collapse of $q_2$ to $\ket 1$. Overall, the measurement probabilities amount to:
+$$\begin{array}{ r l l }
+\text{eigenstate }\ket{1 1 q_0}: & P(\text{interaction}) & = \frac{\beta^2}{2} \\
+\text{eigenstate }\ket{q_2 0 0}: & P(D0) & = 1 - \frac{3 \beta^2}{4} \\
+\text{eigenstate }\ket{1 0 1}: & P(D1) & = \frac{\beta^2}{4}
 \end{array}$$
-The ratio $P(D1) : P(\text{interaction}) = 1 : 2$ is independent of $q_2$. Since $D1$ triggering represents an interaction-free measurement, this means the "counterfactual efficiency" of $U$ is limited to 50\%; i.e. for every interaction-free measurement there will be, on average, two interactions.
+The ratio $P(D1) : P(\text{interaction}) = 1 : 2$ is independent of $q_2$. Since $D1$ triggering represents an interaction-free measurement, this means the "counterfactual efficiency" of $U$ is limited: for every interaction-free measurement there will be, on average, two interactions.
 
+These statistics can be improved by altering the properties of the beam-splitters. Previously, we used two identical splitters, each of which reflects and transmits equal intensities of light. We could in principle instead use two different beam splitters that perform the operations:
+$$\RX(\theta) = \begin{pmatrix}
+\cos(\theta / 2) && -i\sin(\theta / 2)\\
+-i\sin(\theta / 2) && \cos(\theta / 2)
+\end{pmatrix}$$
+$$\mathrm{R^\prime_X(\theta)} = \begin{pmatrix}
+\sin(\theta / 2) && -i\cos(\theta / 2)\\
+-i\cos(\theta / 2) && \sin(\theta / 2)
+\end{pmatrix}$$
+\begin{figure} \label{fig:circuit-improved}
+\includegraphics[scale=0.8]{mach-zender-improved}
+\centering
+\caption{Mach-Zender interferometer with altered beam splitters designed to divert most light away from the object for small values of $\theta$.}
+\end{figure}
+For a small $\theta$, $R_X$ mainly transmits, and $R^\prime_X$ mainly reflects. We can modify our unitary to use $R_X$ as the first splitter and $R^\prime_X$ as the second, the effect of which is to divert the majority of photon's amplitude away from the obstructing object (Fig. \ref{fig:circuit-improved}). The resulting transformation is:
+$$U(\theta) = \mathrm{R^\prime_X(\theta)_0} \X_0 \CCX_{021} \RX(\theta)$$
+Similarly to the original unitary $U(-\pi/2)$, the result of $U(\theta)$ acting on $\ket{q_200}$ (discarding a global phase of $-i$) is:
+\begin{multline}
+\alpha\ket{000} \\+ \beta \ket 1 \otimes \frac{1}{2}(\ket0 \otimes (\cos^2(\theta/2)\ket 0 + i \cos(\theta/2)\sin(\theta/2)\ket 1)\\+ \ket 1 \otimes (\sin^2(\theta/2)\ket 0 - i\cos(\theta/2)\sin(\theta/2)\ket 1)
+\end{multline}
+Here the probability of interaction (measuring $q_1 \to 1$) and of interaction-free measurement (measuring $q_1 \to 0$ and $q_0 \to 1$) are respectively:
+$$\begin{aligned}
+P(\text{interaction}) = && \sin^4(\theta/2) + \cos^2(\theta/2)\sin^2(\theta/2)\\
+P(D1) = && \cos^2(\theta/2)\sin^2(\theta/2)\end{aligned}$$
+And so:
+$$\frac{P(D1)}{P(\text{interaction})} = \frac{1}{1 + \tan^2(\theta/2)}$$
+This approaches 1 for small $\theta$, giving a lower limit of 50\% for the average fraction of measurements that result in interaction with the object being measured.
+
+More recent research has demonstrated even more efficient methods of performing counterfactual computations using the Quantum Zeno effect, in which the interaction qubit is repeatedly rotated into a state with much greater $\ket 0$ amplitude than $\ket 1$ amplitude and then measured. Since measurement of $q_1$ does not erase the state of $q_0$, it is possible to gradually rotate $q_0$ into an arbitrarily high probability of measuring to 1, while maintaining a negligible probability of interaction. However, this process requires apparatus significantly more complex than the basic Mach-Zender setup, and I will not describe it in detail here.
+
+I will however illustrate a potential application of interaction-free measurement, which is to reduce the effect of radiation damage in imaging techniques such as microscopy.
 \end{document}
