@@ -1,0 +1,58 @@
+\documentclass{article}
+
+\usepackage{amsmath, amssymb, braket}
+
+\author{Adrian Hall}
+\title{Interaction-Free Measurement and Counterfactual Quantum Computation}
+
+\begin{document}
+
+\maketitle
+
+In 1993, Elitzur and Vaidman put forward an interesting consequence of quantum mechanics that permits measurement of a physical system without interacting with it.
+
+[Picture of the Mach-Zender interferometer, with and without the first mirror.]
+
+To describe this example in terms of quantum stuff, let's assign qubit states to the photon. Assuming the interferometer is working properly, the photon will always (classically) be going either up or to the right, which we can represent with a single bit. Just as a photon can be in a superposition of taking both paths through the interferometer, a single qubit can be in a superposition of two classical bit values, making it an apt choice to model this system. Let state $\ket 0$ represent a photon traveling in the rightward direction, and state $\ket 1$ represent a photon traveling upward.
+
+The optical components present include 45° mirrors and beam-splitters, as well as a pair of photon detectors. To properly capture the system's behavior, we need to represent the effects of these devices as operations on a qubit. Simplest is the pair of fully-silvered mirrors, which converts each rightward-traveling photon to an upward-traveling one, and vice-versa. For a photon in superposition, it swaps the amplitudes of upward- and rightward-traveling components, sending $\ket 0 \to \ket 1$ and $\ket 1 \to \ket 0$, which means that the mirrors have the effect of applying the Pauli $X$ gate to the traveling photon. As a side note, a physical consequence of the reflection of light by a mirror is that each reflected photon gains a phase of $\pi/2$. However, this global phase of $i$ is not observable, so we will ignore it.
+
+The effect of each beam-splitter is to reflect half of the incident light and transmit the rest. To a single photon traveling purely in one direction, they have the effect of creating a superposition of upward and rightward travel. Here, the phase shift due to reflection is relative, since transmitted light is not shifted, so we must keep track of it:
+$$\ket 0 \to \frac{\ket 0 + i\ket 1}{\sqrt{2}} \qquad \ket 1 \to \frac{i\ket 0 + \ket 1}{\sqrt{2}}$$
+This operation can be written as:
+$$2^{-1/2}\begin{pmatrix}1 && i \\ i && 1\end{pmatrix} = \cos\frac{\pi}{4}I + i\sin\frac{\pi}{4}X = R_X\left(-\frac{\pi}{2}\right)$$
+Therefore, the Mach-Zender interferometer, in the absence of an obstructing object, performs the unitary transformation
+$$R_X\left(-\frac{\pi}{2}\right)XR_X\left(-\frac{\pi}{2}\right)$$
+The effect of the detectors is then to measure the state of the photon qubit after the interferometer has acted on it. A photon that leaves the second beam-splitter traveling right will strike $D0$, and one traveling up will strike $D1$.
+
+Let's examine what happens when a photon traveling right enters the interferometer:
+\begin{equation} \label{seq_0}
+\ket 0 \xrightarrow{R_X\left(-\frac{\pi}{2}\right)} \frac{\ket 0 + i\ket 1}{\sqrt{2}} \xrightarrow{X} \frac{\ket 1 + i\ket 0}{\sqrt{2}} \xrightarrow{R_X\left(-\frac{\pi}{2}\right)} \frac{i\ket 0 + \ket 1 + i\ket 0 - \ket 1}{2} = i\ket 0
+\end{equation}
+And traveling up:
+\begin{equation} \label{seq_1}
+\ket 1 \xrightarrow{R_X\left(-\frac{\pi}{2}\right)} \frac{i\ket 0 + \ket 1}{\sqrt{2}} \xrightarrow{X} \frac{i\ket 1 + \ket 0}{\sqrt{2}} \xrightarrow{R_X\left(-\frac{\pi}{2}\right)} \frac{-\ket 0 + i\ket 1 + \ket 0 + i\ket 1}{2} = i\ket 1
+\end{equation}
+So, by linearity, the empty interferometer is equivalent to the transformation $iI$; the direction of the exiting photon is unaltered. If a photon enters traveling to the right (in state $\ket 0$), it will strike detector $D0$ with 100\% probability. An optical description of this effect is to say that destructive interference between the two beams incident on the second beam-splitter cancels out the final upward-traveling component. As I will explain shortly, if one of these beams is obstructed, then this interference effect will not occur, permitting light to enter both detectors.
+
+In order to represent the effect of an obstructing object, we need to keep track of additional information. Unlike the unobstructed system, absorption or scattering of a photon is not a reversible process, and therefore cannot be represented by a unitary transformation. Upon interaction, the obstructing object has the effect of coupling the photon's state to a noisy thermal environment, which in practice will cause a "collapse" to a classical state of having either interacted or not interacted. In the language of quantum computing, the interaction amounts to classical measurement of a quantum state.
+
+We can use a second qubit to track whether or not an interaction has occurred. Let $q_0$ encode the photon probe's direction as described above, and let $q_1$ be in state $\ket 1$ if the photon is incident on the object, and state $\ket 0$ if no interaction occurs. In the presence of an object, an interaction will occur iff the photon is traveling up, so $q_1$ will change from $\ket 0 \to \ket 1$ iff $q_0 = \ket 1$. This can be modeled as a $CX_{01}$ gate, meaning that the obstructed interferometer is equivalent to the transformation:
+$$R_X\left(-\frac{\pi}{2}\right)_0 X_0 \, CX_{01} \, R_X\left(-\frac{\pi}{2}\right)_0$$
+Following the action of the above transformation, we will measure $q_1$ to induce a partial collapse. As above, let's examine the behavior for initial state $\ket{00}$, which represents the photon traveling right with no interaction having occurred yet.
+\begin{multline*}
+\ket{00} \xrightarrow{R_X\left(-\frac{\pi}{2}\right)_0} \frac{\ket{00} + i\ket{01}}{\sqrt{2}} \xrightarrow{X_0} \frac{\ket{01} + i\ket{00}}{\sqrt{2}}\\
+\xrightarrow{CX_{01}} \frac{\ket{11} + i\ket{00}}{\sqrt{2}} \xrightarrow{R_X\left(-\frac{\pi}{2}\right)_0} \frac{i\ket{10} + \ket{11} + i\ket{00} - \ket{01}}{2}\\
+= \frac{i}{\sqrt{2}}(\ket0 \otimes \ket{+i} + \ket1 \otimes \ket{-i})
+\end{multline*}
+%\begin{multline*}
+%\ket{01} \xrightarrow{R_X\left(-\frac{\pi}{2}\right)_0} \frac{i\ket{00} + \ket{01}}{\sqrt{2}} \xrightarrow{X_0} \frac{i\ket{01} + \ket{00}}{\sqrt{2}}\\
+%\xrightarrow{CX_{01}} \frac{i\ket{11} + \ket{00}}{\sqrt{2}} \xrightarrow{R_X\left(-\frac{\pi}{2}\right)_0} \frac{-\ket{10} + i\ket{11} + \ket{00} + i\ket{01}}{2}\\
+%= \frac{i}{\sqrt{2}}(\ket0 \otimes \ket{+i} - \ket1 \otimes \ket{-i})
+%\end{multline*}
+By comparing this sequence to (\ref{seq_0}), we can see that the where we had $\ket 1$ and $-\ket 1$ canceling, we now have the linearly independent $\ket{11}$ and $-\ket{01}$. Measurement of $q_1$ in the computational basis gives:
+$$q_1 \to 0: q_0 = \ket{+i} \qquad q_1 \to 1: q_0 = \ket{-i}$$
+Unlike the unobstructed case, in which the photon always ends up traveling in the same direction that it started in, the obstructed interferometer has a 50\% chance of exiting in a different direction. Thus, it is possible for a photon fired in the rightward direction $\ket 0$ to trigger detector $D1$ iff there is an obstruction. It is particularly interesting that this is true whether or not the interaction occurs. Even if $q_1$ measures to 0, $q_0$ will remain in a superposition of $\ket 0$ and $\ket 1$.
+
+
+\end{document}
